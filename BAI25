@@ -1,0 +1,193 @@
+using System;
+using System.Collections.Generic;
+
+// Abstract class Person
+public abstract class Person
+{
+    public string name;
+    public int age;
+    public string gender;
+    protected string bank_account;
+
+    public Person(string name, int age, string gender, string bank_account = "")
+    {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+        this.bank_account = bank_account;
+    }
+
+    public abstract string getRole();
+}
+
+// Interface KPIEvaluator
+public interface KPIEvaluator
+{
+    double calculateKPI();
+}
+
+// Class TeachingAssistant
+public class TeachingAssistant : Person, KPIEvaluator
+{
+    public string employeeID;
+    private int numberOfCourses;
+
+    public TeachingAssistant(string name, int age, string gender, string employeeID, int numberOfCourses)
+        : base(name, age, gender)
+    {
+        this.employeeID = employeeID;
+        this.numberOfCourses = numberOfCourses;
+    }
+
+    public override string getRole()
+    {
+        return "Teaching Assistant";
+    }
+
+    public double calculateKPI()
+    {
+        return numberOfCourses * 5.0;
+    }
+}
+
+// Class Lecturer
+public class Lecturer : Person, KPIEvaluator
+{
+    public string employeeID;
+    private int numberOfPublications;
+
+    public Lecturer(string name, int age, string gender, string employeeID, int numberOfPublications)
+        : base(name, age, gender)
+    {
+        this.employeeID = employeeID;
+        this.numberOfPublications = numberOfPublications;
+    }
+
+    public override string getRole()
+    {
+        return "Lecturer";
+    }
+
+    public double calculateKPI()
+    {
+        return numberOfPublications * 7.0;
+    }
+}
+
+// Class Professor
+public sealed class Professor : Lecturer
+{
+    public static int countProfessors = 0;
+    private int numberOfProjects;
+
+    public Professor(string name, int age, string gender, string employeeID, int numberOfPublications, int numberOfProjects)
+        : base(name, age, gender, employeeID, numberOfPublications)
+    {
+        this.numberOfProjects = numberOfProjects;
+        countProfessors++;
+    }
+
+    public override string getRole()
+    {
+        return "Professor";
+    }
+
+    public override double calculateKPI()
+    {
+        return base.calculateKPI() + numberOfProjects * 10.0;
+    }
+}
+
+// Main class
+class Program
+{
+    static void Main()
+    {
+        // Create and display individual objects
+        TeachingAssistant ta = new TeachingAssistant("Alice", 28, "Female", "TA001", 3);
+        Lecturer lecturer = new Lecturer("Bob", 40, "Male", "LEC002", 5);
+        Professor professor = new Professor("Carol", 50, "Female", "PRO003", 10, 4);
+
+        DisplayPersonInfo(ta);
+        DisplayPersonInfo(lecturer);
+        DisplayPersonInfo(professor);
+
+        // Enter and display an array of objects
+        int n;
+        do
+        {
+            Console.Write("Enter the number of objects (between 2 and 10): ");
+        } while (!int.TryParse(Console.ReadLine(), out n) || n < 2 || n > 10);
+
+        Person[] people = new Person[n];
+        for (int i = 0; i < n; i++)
+        {
+            people[i] = CreatePerson();
+        }
+
+        Console.WriteLine("\nDisplaying array of objects:");
+        foreach (var person in people)
+        {
+            DisplayPersonInfo(person);
+        }
+
+        Console.WriteLine($"\nNumber of Professors: {Professor.countProfessors}");
+    }
+
+    static void DisplayPersonInfo(Person person)
+    {
+        Console.WriteLine($"\nRole: {person.getRole()}");
+        Console.WriteLine($"Name: {person.name}, Age: {person.age}, Gender: {person.gender}");
+        if (person is KPIEvaluator kpiEvaluator)
+        {
+            Console.WriteLine($"KPI: {kpiEvaluator.calculateKPI()}");
+        }
+    }
+
+    static Person CreatePerson()
+    {
+        Person person = null;
+        string type;
+        do
+        {
+            Console.Write("Enter the type of object (ta, lec, prof): ");
+            type = Console.ReadLine().ToLower();
+        } while (type != "ta" && type != "lec" && type != "prof");
+
+        Console.Write("Enter name: ");
+        string name = Console.ReadLine();
+        Console.Write("Enter age: ");
+        int age = int.Parse(Console.ReadLine());
+        Console.Write("Enter gender: ");
+        string gender = Console.ReadLine();
+
+        if (type == "ta")
+        {
+            Console.Write("Enter employeeID: ");
+            string employeeID = Console.ReadLine();
+            Console.Write("Enter number of courses: ");
+            int numberOfCourses = int.Parse(Console.ReadLine());
+            person = new TeachingAssistant(name, age, gender, employeeID, numberOfCourses);
+        }
+        else if (type == "lec")
+        {
+            Console.Write("Enter employeeID: ");
+            string employeeID = Console.ReadLine();
+            Console.Write("Enter number of publications: ");
+            int numberOfPublications = int.Parse(Console.ReadLine());
+            person = new Lecturer(name, age, gender, employeeID, numberOfPublications);
+        }
+        else if (type == "prof")
+        {
+            Console.Write("Enter employeeID: ");
+            string employeeID = Console.ReadLine();
+            Console.Write("Enter number of publications: ");
+            int numberOfPublications = int.Parse(Console.ReadLine());
+            Console.Write("Enter number of projects: ");
+            int numberOfProjects = int.Parse(Console.ReadLine());
+            person = new Professor(name, age, gender, employeeID, numberOfPublications, numberOfProjects);
+        }
+
+        return person;
+    }
+}
